@@ -1,6 +1,6 @@
 # Anthropic support replies on training a classifier with Claude outputs
 
-**STATUS: NOT formal authorization.** Both replies below came from Anthropic's AI support assistant. The second states it cannot provide formal legal authorization and recommends contacting Anthropic's legal or partnerships team via a human agent. Treat them as evidence of Anthropic's published position, not as permission.
+**STATUS: NOT authorization. A human support agent ("DV") has now confirmed Support cannot provide written authorization or legal interpretation.** Both replies below came from Anthropic's AI support assistant. The second states it cannot provide formal legal authorization and recommends contacting Anthropic's legal or partnerships team via a human agent. Treat them as evidence of Anthropic's published position, not as permission.
 
 **Received:** [fill in date]  
 **Sender address / channel:** [fill in: exact From address, and whether it came from the support team or the AI assistant]  
@@ -42,3 +42,15 @@ You can continue this conversation with a human agent who can help connect you w
 ## Suggested follow-up (one line)
 
 "Thank you. Please confirm that this reply is Anthropic's prior authorization under the Usage Policy for training a discriminative source-identification classifier on Claude outputs, and whether releasing the trained classifier weights is also permitted."
+
+
+## Third reply: human support agent (signed "DV"), copied in summary
+
+- Support cannot provide written authorization or a legal interpretation of the Usage Policy or Commercial Terms, so it cannot confirm that a specific use, or release of trained weights, is permitted.
+- Pointed to the Commercial Terms and Usage Policy, including requirements on using outputs to develop or train models.
+- Said that where the Usage Policy requires prior authorization, **the policy itself lists the contact route** for the request; asked me to submit through that channel with the same detail (discriminative classifier only, no generation, no dataset publication, open-source research use).
+- Recommended having my institution's legal or research-compliance office review the terms and project plan.
+
+**My check (Usage Policy page read 2026-10-28, effective Nov 12, 2026):** I did not find a contact route for prior-authorization requests on that page. The only contact listed is usersafety@anthropic.com, which is for reporting inaccurate, biased or harmful model outputs. The only application programs listed are the Cyber Verification Program and the Life Sciences Verification Program, which do not apply. So the pointer in the reply could not be matched to anything on the page I read.
+
+**Outcome:** no authorization has been obtained and none is available through Support. Default stands: no training on Claude outputs.
