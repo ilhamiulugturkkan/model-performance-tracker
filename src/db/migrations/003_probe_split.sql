@@ -1,0 +1,1 @@
+ALTER TABLE probes ADD COLUMN split TEXT CHECK (split IN ('scheduled', 'heldout'));
