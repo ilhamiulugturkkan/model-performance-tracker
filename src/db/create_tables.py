@@ -1,8 +1,8 @@
 import sqlite3
 
-conn = sqlite3.connect(
-    "/Users/ilhamiulugturkkan/Desktop/model-performance-tracker/mpt.db"
-)
+from connection import connect
+
+conn = connect()
 
 try:
     cursor = conn.cursor()
