@@ -16,3 +16,4 @@ jobs:
       - run: ruff check .
       - run: ruff format --check .
       - run: pytest
+      - run: python3 -m src.probes.validate probes/*.jsonl
