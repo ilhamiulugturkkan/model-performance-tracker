@@ -212,16 +212,19 @@ def check_scorer(obj):
         ):
             errors.append("unit_tests: entry_point must be a valid Python name")
         if "tests" in obj:
-            if not is_text(tests):
-                errors.append("unit_tests: tests must be a non-empty string")
+            if not list_of(is_text)(tests):
+                errors.append(
+                    "unit_tests: tests must be a non-empty list of non-empty strings"
+                )
             else:
-                try:
-                    ast.parse(tests)
-                except SyntaxError as e:
-                    errors.append(
-                        f"unit_tests: tests are not valid Python: {e.msg} (line {e.lineno})"
-                    )
-                if isinstance(entry, str) and entry not in tests:
+                for i, test in enumerate(tests):
+                    try:
+                        ast.parse(test)
+                    except SyntaxError as e:
+                        errors.append(
+                            f"unit_tests: tests[{i}] is not valid Python: {e.msg}"
+                        )
+                if isinstance(entry, str) and not any(entry in t for t in tests):
                     errors.append("unit_tests: entry_point does not appear in tests")
         if (
             isinstance(entry, str)
