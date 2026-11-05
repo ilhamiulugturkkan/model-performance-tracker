@@ -15,5 +15,9 @@ jobs:
       - run: pip install -r requirements-dev.txt
       - run: ruff check .
       - run: ruff format --check .
+      - name: Build the sandbox image
+        run: docker build -t watchdog-sandbox src/scorer/unit_tests
       - run: pytest
+        env:
+          REQUIRE_DOCKER: "1"
       - run: python3 -m src.probes.validate probes/*.jsonl
