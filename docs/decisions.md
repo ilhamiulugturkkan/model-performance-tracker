@@ -44,3 +44,13 @@ Write the evaluation plan before collecting data. Tune on dev data only; report 
 SQLite for development and for the scheduler, one database file. Structured columns for analysis (provider, model, probe, score, tokens, cost, latency, timestamps) plus one `raw_response` column holding the full API response as JSON text. Keep the schema Postgres-compatible, and use numbered migration files so schema changes in later weeks don't break old data. The database file is never committed to git.
 Why: one file means easy backup and easy reproduction; I already know SQL; the data is row-shaped and analysis is mostly GROUP BY.
 Would change it: multiple processes needing to write at the same time, or the file growing beyond what one machine handles comfortably.
+
+### D11. Calls with no reply are not scored (2026-11-04, active)
+A call that returns nothing (timeout, API error, no output) gets no `scores` row. The failure goes in `calls.error`. The scorers return `passed = None` with `details = {"reason": "no reply"}`, so it can't be stored as a 0 by accident (`scores.score` is NOT NULL).
+- **Pass rate** = passed / calls that returned a reply. An empty string counts as a reply and is scored (a fail).
+- **Error rate** = calls with `calls.error` set / all calls. Tracked and reported separately, per provider and category.
+Why: an outage or timeout says nothing about answer quality. Counting it as a wrong answer would show a "quality drop" during every provider incident, and it would hide a real quality change inside the outage noise. A rise in error rate is still a signal worth detecting, just a different one.
+Cost: if a provider starts failing only on the hard probes, the pass rate looks better than it should. The separate error rate is what exposes that, so it must always be shown next to the pass rate.
+Also decided here: `scores.details` is always a JSON object. `json_match` logs `{"reason", "fenced"}`, `numeric_match` logs `{"reason", "value"}`, `rule_check` logs one entry per rule. Fenced JSON replies are accepted. `starts_with` and `ends_with` compare whole words, ignoring case.
+**Would change it:** if the error rate turns out to depend on the probe content (for example long outputs timing out), pass rates over returned calls would be biased, and I would need to treat those errors as failures.
+

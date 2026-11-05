@@ -102,4 +102,4 @@ Already decided: false-alarm target (1 per 500 checks), repeats per case (20), c
 
 ## Addenda (dated changes to this plan)
 
-*(none yet)*
+**2026-11-04: pass-rate denominator and error rate (see D11).** Pass rate is computed over calls that returned a reply. Calls with no reply are not scored and are counted in a separate error rate (`calls.error` set / all calls), reported next to every pass rate. Reason: provider outages should not look like quality drops. This does not change the three detection metrics. Error rate is reported as its own series and is not one of the four detector signals unless a later addendum adds it.
