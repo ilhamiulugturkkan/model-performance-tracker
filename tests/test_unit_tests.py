@@ -13,6 +13,7 @@ tests/coding_reference.py (one correct solution per probe).
 """
 
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -194,24 +195,32 @@ def test_a_broken_probe_is_a_loud_error_not_a_model_failure():
 # ----------------------------------------------------------------------------
 # Layer 2: the real sandbox
 # ----------------------------------------------------------------------------
-def docker_ready():
+def docker_problem():
+    """Return None if the sandbox is usable, otherwise a short reason why not."""
     if shutil.which("docker") is None:
-        return False
+        return "docker is not on the PATH"
     try:
         done = subprocess.run(
             ["docker", "image", "inspect", IMAGE],
             capture_output=True,
+            text=True,
             timeout=20,
             check=False,
         )
-    except (subprocess.TimeoutExpired, OSError):
-        return False
-    return done.returncode == 0
+    except subprocess.TimeoutExpired:
+        return "docker did not answer within 20s (is Docker Desktop still starting?)"
+    except OSError as error:
+        return f"cannot run docker: {error}"
+    if done.returncode == 0:
+        return None
+    if "daemon" in done.stderr.lower():
+        return "the Docker engine is not running (open Docker Desktop and wait until it says running)"
+    return f"image {IMAGE!r} not found (build it: docker build -t {IMAGE} src/scorer/unit_tests)"
 
 
+DOCKER_PROBLEM = docker_problem()
 requires_docker = pytest.mark.skipif(
-    not docker_ready(),
-    reason=f"Docker or the image {IMAGE!r} is not available. Build it: docker build -t {IMAGE} src/scorer/unit_tests",
+    DOCKER_PROBLEM is not None, reason=f"sandbox tests skipped: {DOCKER_PROBLEM}"
 )
 
 
@@ -223,6 +232,13 @@ def probe_containers():
         check=False,
     )
     return set(out.stdout.split())
+
+
+def test_docker_is_usable_when_it_is_required():
+    # CI sets REQUIRE_DOCKER=1, so a missing engine or image fails loudly there,
+    # instead of the sandbox tests being skipped and CI looking green.
+    if os.environ.get("REQUIRE_DOCKER") == "1":
+        assert DOCKER_PROBLEM is None, DOCKER_PROBLEM
 
 
 @requires_docker
