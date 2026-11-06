@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from src.db.connection import connect
+from src.db.connection import DB_PATH, connect
 
 MIGRATIONS_DIR = Path(__file__).resolve().parent / "migrations"
 
@@ -27,7 +27,10 @@ def migrate(conn):
 
 
 if __name__ == "__main__":
-    conn = connect()
+    import sys
+
+    db_path = sys.argv[1] if len(sys.argv) > 1 else DB_PATH
+    conn = connect(db_path)
     try:
         migrate(conn)
     finally:
