@@ -1,0 +1,114 @@
+{
+  "id": "resp_07d821ed5f2105d4006aed52e5ac8887d28d87fdc8556d2e74",
+  "access_programs": null,
+  "created_at": 1793938149.0,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "metadata": {},
+  "model": "gpt-6-luna",
+  "object": "response",
+  "output": [
+    {
+      "id": "rs_07d821ed5f2105d4006aed52e7295087d2bf17826aa6d31e7a",
+      "summary": [],
+      "type": "reasoning",
+      "content": [],
+      "encrypted_content": "gAAAAABq7VLnS83xniLY3dZdrrygxYdS-3hMIfc614Bd1iVKFHUWcvf5T7EAXduouQOI8YGeZhNIrqw7wiU-30o9Cb4ekghx9RsUMKQolpS13w44RX7de2WPpxhNcuoF6HiPssrXo_YZvhqIqmEcoTMXlWUnYGNUnGZXQBjxVQImTkFqpRJvBIAZ3ZCA00fUVAwZUqe7yibKKo0f2oLjsQf2bB0zQmzLpUJVinS-IxkqQN1iq2QmoX7q1z0TLe_XVZsPbE2OQTyFwY0vuXPY2NOMu9FhRN24zdC_qMHmlEI_Wk1YHpEskmjzS-OeySPxavlgtM8lAqtRADqS_ap6C08sGeeAMlYNF_WokpHhj3BVnC2_pkeu62LpKEipTwkgvYlxL1Fu6VEi2iZaMXd3-ytJy7_dbUVSFQoMKKXgCjvqNO5sB3_APO2ckxqzeYWUMIAa-oRkVG2PqW_yZqH6EcGp1oIvM-_wORGMKuUCascfRksF2XEiF9V9yE2HzGoIX2sX1XXmmWKdxA6bpceQKBjcamcp_5QgMV723f1jwxbreXTA4X3WE0DhhkDT0iE9BJ19GSbL_UotUjJbj-fcPH_iXGYbHz4fUZ7j767BdsulmR68QUQ7DNurSNYep9F7oVZlbPei1x9d2WUS-ToVVOy7I-PC8qNta4OZdhqgXvGhgzKDMx9U-wO8nT0ipY48Nuig_LFjivvXhGorvtGOJVoXTfPmEhfGYXvXP3MGx0DmK41FpDSNhr6yWAuaduN-pod9Yumw4qe9gelEJzMzs0TsEsOo8aY_IZnInNFRRtxa44P-FO61VUc7LibSc8WxJdWYoagvisdDt62WXSnRAio9L_CoSCnmK5KuZca7RGX6xdLTEH0C2fAjpeitLv_534QDwQaULSKgpcq5tvdKaNnMaYMbZAtv05f7bvFZdUcDkyXSCvFyMv8HSAsIq_GstXGntfyncGbKBFXrp8ik-9AH4OOt0vcJtYraZHG-qvcf5e7-00zp7HDShSJjNg6rOe_eJL8m5COUjjkmOYPJdSn4tDbFnuFfhSw_rKu_VZPklNMp7CFMiTBvylr5b_O0UQopLhUzrb5NuT4P4GO9cVTGjNqIR761BNQPaE6QX_pWReQW6875X5INT9YLPcHlJwa5ktLX7BQV2j0npqGpEcqtfJxAOTuHoNhlFtqth5YGAcyUqWmuhHQe8zWTivy3EnuWKilp-Ziyn8nNjfaQGWhRdqtPXl67YUGWICTX4T9szatZb6QA7AaFEWl6pn63Y65hV8dwNzqeJTvaUYb4KVot4KJKMZEtIDzLZbYAnziFqIXaLkiaK7gEA6t214798NjR_N6JDBebfBdnyEF14fnbozkM5FogNmn0ZAQ6-7Qfqxco_vD4tCB6eH9rTV0E3T4O5-HX9hDNu7Y2Tf2rrTpUH8eKkxoxpXU-rc6asUWPEIvsOwoPMDglmYjZD_xmR-C0jWekyoKIVCvFaHXSLIYsBcu3VsUhg41ODRQAPv31qShi5CoGeS6lsGJ_aUP53LjkUgHgJPlrTPtuw2eD8zmVA5DJfR7pUtxMRpwTa3V5_0NvKzpcQ40=",
+      "status": null
+    },
+    {
+      "id": "msg_07d821ed5f2105d4006aed52e7475c87d2971d7136b4730a5d",
+      "content": [
+        {
+          "annotations": [],
+          "text": "391",
+          "type": "output_text",
+          "logprobs": []
+        }
+      ],
+      "role": "assistant",
+      "status": "completed",
+      "type": "message",
+      "phase": "final_answer"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "temperature": 1.0,
+  "tool_choice": "auto",
+  "tools": [],
+  "top_p": 0.98,
+  "background": false,
+  "completed_at": 1793938151.0,
+  "conversation": null,
+  "image": {
+    "context_compression": "disabled"
+  },
+  "max_output_tokens": 1000,
+  "max_tool_calls": null,
+  "moderation": null,
+  "previous_response_id": null,
+  "prompt": null,
+  "prompt_cache_diagnostics": null,
+  "prompt_cache_key": null,
+  "prompt_cache_options": null,
+  "prompt_cache_retention": "24h",
+  "reasoning": {
+    "context": "all_turns",
+    "effort": "medium",
+    "generate_summary": null,
+    "mode": "standard",
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "status": "completed",
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "tool_usage": {
+    "image_gen": {
+      "input_tokens": 0,
+      "input_tokens_details": {
+        "image_tokens": 0,
+        "text_tokens": 0
+      },
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "cached_tokens": null,
+      "cached_tokens_details": null,
+      "output_tokens_details": {
+        "image_tokens": 0,
+        "text_tokens": 0
+      }
+    },
+    "web_search": {
+      "num_requests": 0
+    }
+  },
+  "top_logprobs": 0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 20,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0,
+      "cache_write_tokens_details": null
+    },
+    "output_tokens": 24,
+    "output_tokens_details": {
+      "reasoning_tokens": 17
+    },
+    "total_tokens": 44
+  },
+  "user": null,
+  "billing": {
+    "payer": "developer"
+  },
+  "frequency_penalty": 0.0,
+  "presence_penalty": 0.0,
+  "store": true
+}
