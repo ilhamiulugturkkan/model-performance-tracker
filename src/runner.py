@@ -17,10 +17,17 @@ import sys
 from collections import Counter, defaultdict
 from datetime import UTC, datetime
 
+from src.alerts import send_telegram
 from src.db.connection import DB_PATH, connect
 from src.providers.clients import call_model, make_client
 from src.providers.models import MODELS, parameters_record
 from src.scorer import get_scorer
+
+NOTIFIERS = {
+    "print": print,
+    "telegram": send_telegram,
+}  # --notify takes one of these names
+FAILURE_LIMIT = 3  # failed calls in a row (each after every retry) before a provider is given up on for this run
 
 
 def utc_now():
@@ -108,6 +115,22 @@ def _save_call(conn, run_id, probe_id, prompt, config, repeat, started, result):
     conn.commit()
 
 
+class FailureTracker:
+    """Counts failed calls in a row, per provider. A success starts the count again."""
+
+    def __init__(self, limit=FAILURE_LIMIT):
+        self.limit = limit
+        self.streak = Counter()
+
+    def failed(self, provider):
+        """Record a failure. True exactly once: when the streak reaches the limit."""
+        self.streak[provider] += 1
+        return self.streak[provider] == self.limit
+
+    def succeeded(self, provider):
+        self.streak[provider] = 0
+
+
 def collect(
     conn,
     run_id,
@@ -117,11 +140,15 @@ def collect(
     caller=call_model,
     clients=None,
     notify=print,
+    failure_limit=FAILURE_LIMIT,
 ):
     """Send every probe to every model, `repeats` times, and save each reply. Safe to run again."""
     clients = {} if clients is None else clients
     probes = select_probes(conn) if probes is None else probes
-    stopped = set()  # providers we stop calling because the balance is empty
+    stopped = (
+        set()
+    )  # providers we stop calling: empty balance, or too many failures in a row
+    tracker = FailureTracker(failure_limit)
     summary = Counter()
     for probe_id, _slug, _category, body in probes:
         probe = json.loads(body)
@@ -156,11 +183,25 @@ def collect(
                     result,
                 )
                 summary["failed" if result["error"] else "ok"] += 1
-                if result["error"] and result["error"].startswith("quota_exhausted"):
+                if not result["error"]:
+                    tracker.succeeded(provider)
+                elif result["error"].startswith("quota_exhausted"):
                     stopped.add(provider)
                     notify(
                         f"STOP: {provider} balance is empty ({result['error'][:120]}). Top up, then: resume --run-id {run_id}"
                     )
+                elif tracker.failed(provider):
+                    stopped.add(provider)
+                    notify(
+                        f"STOP: {provider} failed {failure_limit} calls in a row, each after every retry "
+                        f"(last: {result['error'][:120]}). Fix it, then: resume --run-id {run_id}"
+                    )
+    if (
+        summary["failed"] and not stopped
+    ):  # a stopped provider has already sent its own alert
+        notify(
+            f"run {run_id}: {summary['failed']} of {summary['failed'] + summary['ok']} calls failed after every retry"
+        )
     return dict(summary)
 
 
@@ -287,7 +328,7 @@ def _connect_and_check(path):
     return conn
 
 
-def _main():
+def build_parser():
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawTextHelpFormatter
     )
@@ -306,25 +347,33 @@ def _main():
     )
     parser.add_argument("--run-id", type=int)
     parser.add_argument("--rescore", action="store_true")
-    args = parser.parse_args()
+    parser.add_argument(
+        "--notify",
+        choices=sorted(NOTIFIERS),
+        default="print",
+        help="where alerts go: the terminal, or Telegram (needs TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID)",
+    )
+    return parser
 
-    conn = _connect_and_check(args.db)  # check if db exists with usable probes
 
-    if (
-        args.command in ("resume", "score", "report") and args.run_id is None
-    ):  # we need run-id to resume, or score, or report
-        sys.exit("--run-id is required")
+def _main():
+    args = build_parser().parse_args()
+    notify = NOTIFIERS[args.notify]
 
-    if args.command == "run":  # if command is run we don't need an id, we'll assign it.
-        # for config, we need to specify which model to run, repeat is generally 3, others are used to indicate what kind of probe to use.
+    conn = _connect_and_check(args.db)  # a database that exists and has probes in it
+    if args.command in ("resume", "score", "report") and args.run_id is None:
+        sys.exit(
+            "--run-id is required"
+        )  # these commands work on a run that already exists
+
+    if args.command == "run":
+        # a new run gets its own id; its config says which models, how many repeats, which probes
         config = {"models": args.models, "repeats": args.repeats, "category": args.category,
                   "split": args.split, "per_category": args.per_category}  # fmt: skip
-
-        # RUN!
         run_id = start_run(conn, config)
         print(f"run {run_id}")
     elif args.command == "resume":
-        # If we resume, fetch the run's config and use the same one.
+        # a resumed run uses the config it started with
         config = json.loads(
             conn.execute(
                 "SELECT config FROM runs WHERE run_id = ?", (args.run_id,)
@@ -335,22 +384,18 @@ def _main():
         run_id = args.run_id
 
     if args.command in ("run", "resume"):
-        # Fetch the probes to use. We put these in our message and wait for a reply.
         probes = select_probes(
             conn, config["category"], config["split"], config["per_category"]
         )
         print(
             "collect:",
             collect(
-                conn, run_id, config["models"], config["repeats"], probes
-            ),  # Send requests and store the replies.
+                conn, run_id, config["models"], config["repeats"], probes, notify=notify
+            ),
         )
-
     if args.command in ("run", "resume", "score"):
-        print(
-            "score:", score(conn, run_id, rescore=args.rescore)
-        )  # Score the responses by fetching them with their run id's
-    report(conn, run_id)  # Report the results for the run.
+        print("score:", score(conn, run_id, rescore=args.rescore, notify=notify))
+    report(conn, run_id)
 
 
 if __name__ == "__main__":
