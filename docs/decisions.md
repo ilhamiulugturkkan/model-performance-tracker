@@ -54,3 +54,15 @@ Cost: if a provider starts failing only on the hard probes, the pass rate looks 
 Also decided here: `scores.details` is always a JSON object. `json_match` logs `{"reason", "fenced"}`, `numeric_match` logs `{"reason", "value"}`, `rule_check` logs one entry per rule. Fenced JSON replies are accepted. `starts_with` and `ends_with` compare whole words, ignoring case.
 **Would change it:** if the error rate turns out to depend on the probe content (for example long outputs timing out), pass rates over returned calls would be biased, and I would need to treat those errors as failures.
 
+### D12 Numeric Scoring: Different Failures
+
+For numeric probes, Cluade fails to give bare numeric answers (although it gives true answers) and luna fails to give correct answers. However for numeric scoring, both giving correct and bare numeric answers are required. Therefore, I won't intervene anything.
+
+### D13 Heldout Probes
+
+I'll create those in W4. Until then, all the written probes' split is "scheduled".
+
+### D14 DB Created
+
+I created the DB and loaded all the probes to it. Therefore PROBES MUST BE THE SAME NOW ON. They shouldn't be changed!!!
+
