@@ -10,6 +10,7 @@ MAX_ATTEMPTS = 3
 BASE_DELAY_SECONDS = 1.0
 MAX_DELAY_SECONDS = 30.0
 RETRYABLE_KINDS = {"rate_limited", "server_error", "timeout", "connection"}
+RATE_LIMIT_WAIT_SECONDS = (55, 65)
 
 API_ERRORS = (anthropic.APIError, openai.APIError)
 
@@ -77,6 +78,26 @@ def error_kind(error):
     return "other"
 
 
+def retry_delay(error, kind, attempt, rng=random):
+    """Seconds to wait before the next attempt.
+
+    The provider's own hint wins. Without one, a rate limit waits about a minute (those limits
+    reset per minute); anything else backs off from one second.
+    """
+    headers = getattr(getattr(error, "response", None), "headers", None) or {}
+    hint = headers.get("retry-after")
+    if hint:
+        try:
+            return min(float(hint), 120.0)
+        except ValueError:
+            pass
+    if kind == "rate_limited":
+        return rng.uniform(*RATE_LIMIT_WAIT_SECONDS)
+    return min(
+        MAX_DELAY_SECONDS, BASE_DELAY_SECONDS * 2 ** (attempt - 1)
+    ) * rng.uniform(0.75, 1.25)
+
+
 def call_model(
     client,
     provider,
@@ -115,19 +136,16 @@ def call_model(
         result["attempts"] = attempt
         started = time.monotonic()
         try:
-            raw = send(client, model, prompt, settings)  # create the request and send
+            raw = send(client, model, prompt, settings)
         except API_ERRORS as error:
             result["latency"] = time.monotonic() - started
             kind = error_kind(error)
             result["http_status"] = getattr(error, "status_code", None)
             result["error"] = f"{kind}: {str(error)[:300]}"
             if kind in RETRYABLE_KINDS and attempt < max_attempts:
-                sleep_time = random.uniform(55, 65)
-                time.sleep(sleep_time)
+                sleep(retry_delay(error, kind, attempt, rng))
                 continue
-            elif attempt == max_attempts:
-                # SEND A WARNING THROUGH TELEGRAM!!! (TODO #1)
-                continue
+            return result
         result["latency"] = time.monotonic() - started
         result.update(PARSERS[provider](raw))
         result["http_status"] = 200
