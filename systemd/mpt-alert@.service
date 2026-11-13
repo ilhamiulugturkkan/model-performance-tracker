@@ -1,0 +1,9 @@
+[Unit]
+Description=Telegram alert: %i failed
+
+[Service]
+Type=oneshot
+User=mpt
+WorkingDirectory=/home/mpt/model-performance-tracker
+EnvironmentFile=/home/mpt/model-performance-tracker/.env
+ExecStart=/home/mpt/model-performance-tracker/.venv/bin/python -c "import sys; from src.alerts import send_telegram; send_telegram('ALERT: ' + sys.argv[1] + ' failed on the server. Look: journalctl -u ' + sys.argv[1] + ' -n 50')" %i
