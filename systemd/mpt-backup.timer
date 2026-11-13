@@ -1,0 +1,10 @@
+[Unit]
+Description=Nightly local backup of the monitoring database
+
+[Timer]
+# 09:00 UTC: after the 03:00 run has finished, and well before the 15:00 one.
+OnCalendar=*-*-* 09:00:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

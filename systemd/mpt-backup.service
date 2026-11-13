@@ -1,0 +1,8 @@
+[Unit]
+Description=Nightly local backup of the monitoring database
+OnFailure=mpt-alert@%n.service
+
+[Service]
+Type=oneshot
+User=mpt
+ExecStart=/home/mpt/model-performance-tracker/scripts/backup.sh
