@@ -66,3 +66,10 @@ I'll create those in W4. Until then, all the written probes' split is "scheduled
 
 I created the DB and loaded all the probes to it. Therefore PROBES MUST BE THE SAME NOW ON. They shouldn't be changed!!!
 
+### D15 VPC
+
+Using DigitalOcean as the VPC.
+
+### D16 SCHEDULED JOBS
+
+Using systemd for scheduled runs. Both for backup (once a day) and for runs (twice a day). I started collecting data on 13 Nov.
