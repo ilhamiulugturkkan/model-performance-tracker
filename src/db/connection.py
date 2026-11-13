@@ -1,6 +1,10 @@
+import os
 import sqlite3
+from pathlib import Path
 
-DB_PATH = "/Users/ilhamiulugturkkan/Desktop/model-performance-tracker/mpt.db"
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+DB_PATH = os.environ.get("MPT_DB_PATH") or str(PROJECT_ROOT / "mpt.db")
 
 
 def connect(db_path=DB_PATH):
