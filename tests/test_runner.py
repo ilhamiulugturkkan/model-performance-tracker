@@ -209,6 +209,36 @@ def test_an_empty_balance_stops_that_provider_only_and_alerts_once(conn):
     assert len(alerts) == 1 and "openai" in alerts[0] and "resume" in alerts[0]
 
 
+def test_a_failing_model_is_stopped_alone_and_its_sibling_keeps_running(conn):
+    def plan(provider, model, prompt, n):
+        if model == "claude-sonnet-5-5":
+            return result(
+                None, error="server_error: boom", http_status=500, finish_reason=None
+            )
+        return result(
+            ANSWERS[prompt],
+            provider=provider,
+            requested_model=model,
+            returned_model=model,
+        )
+
+    alerts = []
+    caller = Caller(plan)
+    _, summary = run_collect(
+        conn, caller, models=["haiku", "sonnet"], repeats=3, notify=alerts.append
+    )
+    models_called = [c[1] for c in caller.calls]
+    assert (
+        models_called.count("claude-sonnet-5-5") == 3
+    )  # three failures, then it stopped asking
+    assert models_called.count("claude-haiku-5-5") == 9  # same provider, carried on
+    assert summary["skipped_model_stopped"] == 6
+    assert "skipped_provider_stopped" not in summary
+    assert (
+        len(alerts) == 1 and "claude-sonnet-5-5" in alerts[0] and "resume" in alerts[0]
+    )
+
+
 # ------------------------------------------------------------------ score
 def test_replies_are_scored_with_the_real_scorers(conn):
     def plan(provider, model, prompt, n):
