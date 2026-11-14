@@ -73,3 +73,7 @@ Using DigitalOcean as the VPC.
 ### D16 SCHEDULED JOBS
 
 Using systemd for scheduled runs. Both for backup (once a day) and for runs (twice a day). I started collecting data on 13 Nov.
+
+### D17 CLAUDE REASONS, GPT DOESN'T (I DON'T ALLOW)
+
+I turned off the reasoning of openai models because of budget concerns. However, I forgot to do the same with Anthropic models (Opus 5.5 ddoesn't even have that option). So Claude costs ~x10. HUGE difference. 
