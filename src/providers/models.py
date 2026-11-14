@@ -6,9 +6,29 @@ MODELS = {
         "model": "claude-haiku-5-5",
         "settings": {"max_tokens": 4096},
     },
+    "sonnet": {
+        "provider": "anthropic",
+        "model": "claude-sonnet-5-5",
+        "settings": {"max_tokens": 4096},
+    },
+    "opus": {
+        "provider": "anthropic",
+        "model": "claude-opus-5-5",
+        "settings": {"max_tokens": 4096},
+    },
     "luna": {
         "provider": "openai",
         "model": "gpt-6-luna",
+        "settings": {"max_tokens": 4096, "temperature": 0, "reasoning_effort": "none"},
+    },
+    "terra": {
+        "provider": "openai",
+        "model": "gpt-6.1-terra",
+        "settings": {"max_tokens": 4096, "temperature": 0, "reasoning_effort": "none"},
+    },
+    "sol": {
+        "provider": "openai",
+        "model": "gpt-6-sol",
         "settings": {"max_tokens": 4096, "temperature": 0, "reasoning_effort": "none"},
     },
 }
