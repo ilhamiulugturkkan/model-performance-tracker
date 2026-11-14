@@ -1,5 +1,5 @@
 [Unit]
-Description=Model monitoring run (all scheduled probes, 3 repeats, 2 models)
+Description=Model monitoring run (all scheduled probes, 3 repeats, 6 models)
 After=network-online.target docker.service
 Wants=network-online.target
 Requires=docker.service
@@ -10,7 +10,7 @@ Type=oneshot
 User=mpt
 WorkingDirectory=/home/mpt/model-performance-tracker
 EnvironmentFile=/home/mpt/model-performance-tracker/.env
-ExecStart=/home/mpt/model-performance-tracker/.venv/bin/python -m src.runner run --models haiku luna --repeats 3 --split scheduled --notify telegram
+ExecStart=/home/mpt/model-performance-tracker/.venv/bin/python -m src.runner run --repeats 3 --split scheduled --notify telegram
 # A hung run is killed after 3 hours and counts as a failure, which triggers the alert.
 TimeoutStartSec=3h
 Nice=10
