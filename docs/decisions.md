@@ -76,4 +76,4 @@ Using systemd for scheduled runs. Both for backup (once a day) and for runs (twi
 
 ### D17 CLAUDE REASONS, GPT DOESN'T (I DON'T ALLOW)
 
-I turned off the reasoning of openai models because of budget concerns. However, I forgot to do the same with Anthropic models (Opus 5.5 ddoesn't even have that option). So Claude costs ~x10. HUGE difference. 
+I turned off the reasoning of openai models because of budget concerns. However, I forgot to do the same with Anthropic models (Opus 5.5 ddoesn't even have that option). So Claude costs ~x10. HUGE difference. So I remove the Opus model.

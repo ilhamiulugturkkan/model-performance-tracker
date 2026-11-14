@@ -11,11 +11,6 @@ MODELS = {
         "model": "claude-sonnet-5-5",
         "settings": {"max_tokens": 4096},
     },
-    "opus": {
-        "provider": "anthropic",
-        "model": "claude-opus-5-5",
-        "settings": {"max_tokens": 4096},
-    },
     "luna": {
         "provider": "openai",
         "model": "gpt-6-luna",
