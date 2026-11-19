@@ -1,4 +1,4 @@
-"""Noise report: python -m scripts.noise_report  ->  results/noise-report.md + 2 SVG charts.
+"""Noise report: python -m experiments.noise_report  ->  docs/noise-report.md + 2 SVG charts.
 
 Noise comes from the burst (68 probes x 20 repeats per model, no change between calls).
 Canonical thresholds: empirical 99.8th percentile of random stratified burst splits (pass rate).
@@ -19,7 +19,7 @@ from statistics import mean, median, stdev, variance
 
 from src.db.connection import connect
 
-BURST_DB, REAL_DB, OUT = "mpt_burst.db", "mpt.db", Path("results")
+BURST_DB, REAL_DB, OUT = "mpt_burst.db", "mpt.db", Path("docs")
 R = 12  # repeats per probe in a production window (4 runs x 3)
 K, N_SPLITS = (
     10,
