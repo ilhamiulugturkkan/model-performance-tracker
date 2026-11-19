@@ -34,7 +34,7 @@ Wording rules:
 
 **What counts as a detection:** an alarm counts as a detection only if it fires within T after a change I caused. T is a number of calls, fixed in the W3.3 addendum after the W3.1 noise report. An alarm that fires before the change, or after T has passed, counts as a false alarm, not a detection. Real, unplanned provider changes are never scored this way, because their true timing is unknown (see "Real-world monitoring").
 
-**Detectors:** pass-rate shift, output-length shift, latency shift, output-text distribution shift, plus a **naive baseline** (alarm when any category's pass rate drops by more than a fixed amount). Statistical test choices and window sizes: `[FILL LATER, after noise report]`. Control for many simultaneous tests: `[FILL LATER]`.
+**Detectors:** pass-rate shift, output-length shift, latency shift, output-text distribution shift, plus a **naive baseline** (alarm when any category's pass rate drops by more than a fixed amount). Statistical test choices and window sizes: 4 runs (2 days). Control for many simultaneous tests: `[FILL LATER]`.
 
 **Baseline to beat:** the naive threshold detector. "Beats" means: `[FILL LATER: higher detection rate at the same false-alarm rate, by at least ___ points]`.
 
