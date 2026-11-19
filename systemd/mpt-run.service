@@ -1,5 +1,5 @@
 [Unit]
-Description=Model monitoring run (all scheduled probes, 3 repeats, 6 models)
+Description=Model monitoring run (all scheduled probes, 3 repeats, 5 models)
 After=network-online.target docker.service
 Wants=network-online.target
 Requires=docker.service
