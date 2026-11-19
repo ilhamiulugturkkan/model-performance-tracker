@@ -27,7 +27,7 @@ NOTIFIERS = {
     "print": print,
     "telegram": send_telegram,
 }  # --notify takes one of these names
-FAILURE_LIMIT = 3  # failed calls in a row (each after every retry) before a provider is given up on for this run
+FAILURE_LIMIT = 3  # failed calls in a row (each after every retry) before a model is given up on for this run
 
 
 def utc_now():
@@ -116,19 +116,19 @@ def _save_call(conn, run_id, probe_id, prompt, config, repeat, started, result):
 
 
 class FailureTracker:
-    """Counts failed calls in a row, per provider. A success starts the count again."""
+    """Counts failed calls in a row, per MODEL. A success starts that model's count again."""
 
     def __init__(self, limit=FAILURE_LIMIT):
         self.limit = limit
         self.streak = Counter()
 
-    def failed(self, provider):
-        """Record a failure. True exactly once: when the streak reaches the limit."""
-        self.streak[provider] += 1
-        return self.streak[provider] == self.limit
+    def failed(self, model):
+        """Record a failure. True exactly once: when the model's streak reaches the limit."""
+        self.streak[model] += 1
+        return self.streak[model] == self.limit
 
-    def succeeded(self, provider):
-        self.streak[provider] = 0
+    def succeeded(self, model):
+        self.streak[model] = 0
 
 
 def collect(
@@ -145,9 +145,8 @@ def collect(
     """Send every probe to every model, `repeats` times, and save each reply. Safe to run again."""
     clients = {} if clients is None else clients
     probes = select_probes(conn) if probes is None else probes
-    stopped = (
-        set()
-    )  # providers we stop calling: empty balance, or too many failures in a row
+    stopped_providers = set()  # an empty balance: every model of that company fails
+    stopped_models = set()  # too many failures in a row: only that model is given up on
     tracker = FailureTracker(failure_limit)
     summary = Counter()
     for probe_id, _slug, _category, body in probes:
@@ -156,8 +155,11 @@ def collect(
             config = MODELS[key]
             provider, model = config["provider"], config["model"]
             for repeat in range(1, repeats + 1):
-                if provider in stopped:
+                if provider in stopped_providers:
                     summary["skipped_provider_stopped"] += 1
+                    continue
+                if model in stopped_models:
+                    summary["skipped_model_stopped"] += 1
                     continue
                 if _already_done(conn, run_id, probe_id, provider, model, repeat):
                     summary["already_done"] += 1
@@ -184,21 +186,22 @@ def collect(
                 )
                 summary["failed" if result["error"] else "ok"] += 1
                 if not result["error"]:
-                    tracker.succeeded(provider)
+                    tracker.succeeded(model)
                 elif result["error"].startswith("quota_exhausted"):
-                    stopped.add(provider)
+                    stopped_providers.add(provider)
                     notify(
                         f"STOP: {provider} balance is empty ({result['error'][:120]}). Top up, then: resume --run-id {run_id}"
                     )
-                elif tracker.failed(provider):
-                    stopped.add(provider)
+                elif tracker.failed(model):
+                    stopped_models.add(model)
                     notify(
-                        f"STOP: {provider} failed {failure_limit} calls in a row, each after every retry "
-                        f"(last: {result['error'][:120]}). Fix it, then: resume --run-id {run_id}"
+                        f"STOP: {model} ({provider}) failed {failure_limit} calls in a row, each after every retry "
+                        f"(last: {result['error'][:120]}). The other models keep running. "
+                        f"Fix it, then: resume --run-id {run_id}"
                     )
-    if (
-        summary["failed"] and not stopped
-    ):  # a stopped provider has already sent its own alert
+    if summary["failed"] and not (
+        stopped_providers or stopped_models
+    ):  # stops have already sent their own alert
         notify(
             f"run {run_id}: {summary['failed']} of {summary['failed'] + summary['ok']} calls failed after every retry"
         )
