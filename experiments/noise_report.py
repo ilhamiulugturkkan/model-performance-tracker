@@ -25,6 +25,7 @@ K, N_SPLITS = (
     10,
     20_000,
 )  # burst split: 10 repeats per probe in each window, scaled to R by sqrt(K / R)
+MIN_VARYING = 3  # fewer varying probes than this = lumpy null distribution, threshold only approximate
 Z, ZB = 3.0902, 0.8416  # 1-in-500 two-sided false alarm, 80% power
 DROPS = (5, 10)  # points of pass rate
 QUERY = """SELECT calls.run_id, calls.provider, calls.request_string, calls.probe_id, scores.score = 1.0,
@@ -88,10 +89,12 @@ def perm_null(model):
         c: [0, 0, 0, 0] for c in real_cats
     }  # sums for probes whose result never varies
     varying = []
+    n_varying = {c: 0 for c in real_cats}
     for p in cat_of:
         v = [t[0] for t in burst[(model, p)] if t[0] is not None]
         if len(set(v)) > 1:
             varying.append((cat_of[p], v))
+            n_varying[cat_of[p]] += 1
         elif v:
             b = base[cat_of[p]]
             b[0] += K * v[0]
@@ -119,7 +122,8 @@ def perm_null(model):
             stdev(d) * sc,
             sorted(abs(x) for x in d)[int(0.998 * (len(d) - 1))] * sc,
         )
-        out[c] = {"std": std, "thr": thr, "mds": thr + ZB * std}
+        n_var = sum(n_varying.values()) if c == "all" else n_varying[c]
+        out[c] = {"std": std, "thr": thr, "mds": thr + ZB * std, "n_varying": n_var}
     return out
 
 
@@ -511,3 +515,33 @@ md += [
 
 (OUT / "noise-report.md").write_text("\n".join(md), encoding="utf-8")
 print(f"wrote {OUT / 'noise-report.md'}", file=sys.stderr)
+
+# Machine-readable thresholds for the detectors: the same canonical 12-repeat pass-rate
+# thresholds as section 1 ("99.8% empirical" column), in points of pass rate.
+# null = no noise in that model/category (every probe gives the same result each time), so no threshold exists.
+thresholds = {
+    "generated": f"{datetime.now(UTC):%Y-%m-%dT%H:%M:%SZ}",
+    "commit": commit,
+    "metric": "pass rate",
+    "unit": "points",
+    "repeats_per_probe": R,
+    "method": f"empirical 99.8th percentile of |window 2 - window 1| over {N_SPLITS} stratified burst splits, scaled to {R} repeats",
+    # Keys whose threshold rests on fewer than MIN_VARYING probes that ever vary in the burst: the null
+    # distribution is lumpy (few discrete steps), so the 99.8th percentile is rough. Use with care.
+    "approximate": [
+        f"{m}|{c}"
+        for m in models
+        for c in cats
+        if floor[m][c]["std"] > 0 and floor[m][c]["n_varying"] < MIN_VARYING
+    ],
+    "thresholds": {
+        f"{m}|{c}": (
+            round(100 * floor[m][c]["thr"], 4) if floor[m][c]["std"] > 0 else None
+        )
+        for m in models
+        for c in cats
+    },
+}
+THRESHOLDS_OUT = Path("src/detectors/thresholds.json")
+THRESHOLDS_OUT.write_text(json.dumps(thresholds, indent=2) + "\n", encoding="utf-8")
+print(f"wrote {THRESHOLDS_OUT}", file=sys.stderr)
