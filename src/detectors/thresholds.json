@@ -1,0 +1,39 @@
+{
+  "generated": "2026-11-22T21:33:13Z",
+  "commit": "917ce6c",
+  "metric": "pass rate",
+  "unit": "points",
+  "repeats_per_probe": 12,
+  "method": "empirical 99.8th percentile of |window 2 - window 1| over 20000 stratified burst splits, scaled to 12 repeats",
+  "approximate": [
+    "claude-sonnet-5-5|math",
+    "claude-sonnet-5-5|structured"
+  ],
+  "thresholds": {
+    "claude-haiku-5-5|coding": null,
+    "claude-haiku-5-5|instructions": 15.8329,
+    "claude-haiku-5-5|math": 5.3251,
+    "claude-haiku-5-5|structured": null,
+    "claude-haiku-5-5|all": 3.8514,
+    "claude-sonnet-5-5|coding": null,
+    "claude-sonnet-5-5|instructions": 10.9545,
+    "claude-sonnet-5-5|math": 2.2822,
+    "claude-sonnet-5-5|structured": 1.8257,
+    "claude-sonnet-5-5|all": 2.0137,
+    "gpt-6-luna|coding": null,
+    "gpt-6-luna|instructions": 12.5637,
+    "gpt-6-luna|math": 3.5501,
+    "gpt-6-luna|structured": null,
+    "gpt-6-luna|all": 2.7264,
+    "gpt-6-sol|coding": null,
+    "gpt-6-sol|instructions": 8.2158,
+    "gpt-6-sol|math": 2.5358,
+    "gpt-6-sol|structured": null,
+    "gpt-6-sol|all": 1.7452,
+    "gpt-6.1-terra|coding": null,
+    "gpt-6.1-terra|instructions": 9.1287,
+    "gpt-6.1-terra|math": 3.0429,
+    "gpt-6.1-terra|structured": null,
+    "gpt-6.1-terra|all": 2.1479
+  }
+}
