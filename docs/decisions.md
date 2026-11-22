@@ -87,3 +87,17 @@ I won't change v1 probes, I'll add new v2 probes for those.
 ### D19 LATENCY THRESHOLD
 
 Deciding on latency threshold would be a mistake (burst and real data sd's are almost identical). I need more data for that so I'll wait for real data to accumulate more. There's no rush.
+
+### D20 NAIVE BASELINE: TWO-SIDED, drop_points CHOSEN PER USE (2026-11-22, active)
+
+`src/baselines/naive.py` is the fixed-threshold baseline the real pass-rate detector has to beat. It alarms when the pass rate moves by `drop_points` or more. It does not read `thresholds.json`, and it has no p-value or CI.
+
+- **Same data as the real detector.** It uses `load_window`, the common-probe rule (`restrict_to_common_probes`, now shared with `detect_windows`) and `compare_windows`. A baseline that sees different data is not a fair comparison.
+- **Mode: two-sided** (`drops_only=False`, `abs(effect) >= drop_points`). The real detector alarms on moves in both directions, so the baseline does too. Using drops-only would make the two detectors answer different questions. `drops_only=True` stays available (`effect <= -drop_points`) for a side comparison, but it is not the one used in the headline comparison.
+- **`drop_points` has no default.** I choose it every time and write it in the table below, with the reason, before looking at the comparison result.
+- Boundary: `>=`, so a move of exactly `drop_points` alarms (the real detector uses `>`). A 1e-9 float guard stops a true -5.0 from slipping under as -4.9999999.
+- Statuses: `no_data` (empty window or no shared probes), otherwise `ok` or `alarm`. Never `not_enough_power`, because it makes no claim about power.
+
+| Date | drop_points | Mode | Used for | Why this number |
+|---|---|---|---|---|
+| 2026-11-22 | 5.0 | two-sided | Naive vs pass-rate detector comparison | Round fixed number, chosen before looking at any comparison result. |
