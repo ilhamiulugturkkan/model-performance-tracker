@@ -86,4 +86,4 @@ I won't change v1 probes, I'll add new v2 probes for those.
 
 ### D19 LATENCY THRESHOLD
 
-Deciding on latency threshold would be a mistake (burst and real data are almost identical). I need more data for that so I'll wait for real data to accumulate more. There's no rush.
+Deciding on latency threshold would be a mistake (burst and real data sd's are almost identical). I need more data for that so I'll wait for real data to accumulate more. There's no rush.
