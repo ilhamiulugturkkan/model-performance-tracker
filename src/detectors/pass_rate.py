@@ -38,6 +38,20 @@ def compare_windows(reference_window, current_window):
     return ref_pass_rate, current_pass_rate, pass_rate_diff, effect
 
 
+def restrict_to_common_probes(reference_window, current_window):
+    """Keep only rows of probes present in both windows (the common-probe rule).
+
+    Shared by the pass-rate detector and the naive baseline so both see the same data.
+    """
+    common = {r["probe_id"] for r in reference_window} & {
+        r["probe_id"] for r in current_window
+    }
+    return (
+        [r for r in reference_window if r["probe_id"] in common],
+        [r for r in current_window if r["probe_id"] in common],
+    )
+
+
 def permutation_p_value(reference_window, current_window, n_perm=10000, seed=0):
     """Two-sided permutation p-value for the difference in window pass rates."""
     # Only probes present in both windows can be compared. A probe seen in one window only
@@ -189,11 +203,9 @@ def detect_windows(
         return result("no_data", "A window has no runs.")
 
     # The thresholds come from windows holding the same probes, so compare only probes seen in both.
-    common = {r["probe_id"] for r in reference_window} & {
-        r["probe_id"] for r in current_window
-    }
-    reference_window = [r for r in reference_window if r["probe_id"] in common]
-    current_window = [r for r in current_window if r["probe_id"] in common]
+    reference_window, current_window = restrict_to_common_probes(
+        reference_window, current_window
+    )
     compared = compare_windows(reference_window, current_window)
     if compared is None:
         return result("no_data", "No scored probes appear in both windows.")
