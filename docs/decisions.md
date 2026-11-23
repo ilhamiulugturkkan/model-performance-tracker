@@ -101,3 +101,7 @@ Deciding on latency threshold would be a mistake (burst and real data sd's are a
 | Date | drop_points | Mode | Used for | Why this number |
 |---|---|---|---|---|
 | 2026-11-22 | 5.0 | two-sided | Naive vs pass-rate detector comparison | Round fixed number, chosen before looking at any comparison result. |
+
+### D21 MIN MEAN TOKENS (OUTPUT LENGTH)
+
+Chosen 5 after checking: no probe under 5; 10 would remove all OpenAI math probes
