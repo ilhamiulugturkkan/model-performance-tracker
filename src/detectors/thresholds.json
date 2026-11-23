@@ -35,5 +35,45 @@
     "gpt-6.1-terra|math": 3.0429,
     "gpt-6.1-terra|structured": null,
     "gpt-6.1-terra|all": 2.1479
+  },
+  "length": {
+    "generated": "2026-11-23T02:12:15Z",
+    "commit": "0716653-dirty",
+    "metric": "output length",
+    "unit": "percent",
+    "repeats_per_probe": 12,
+    "method": "empirical 99.8th percentile of |effect| over 20000 stratified burst splits, where effect = mean per-probe % change in mean output tokens (compare_window_output_lengths), scaled from 10 to 12 repeats by sqrt(10/12); one threshold applied to |effect|; null = deterministic category",
+    "n_splits": 20000,
+    "seed": 0,
+    "approximate": [
+      "gpt-6-sol|math"
+    ],
+    "thresholds": {
+      "claude-haiku-5-5|coding": 12.5555,
+      "claude-haiku-5-5|instructions": 15.8154,
+      "claude-haiku-5-5|math": 9.5728,
+      "claude-haiku-5-5|structured": 3.7047,
+      "claude-haiku-5-5|all": 6.6026,
+      "claude-sonnet-5-5|coding": 1.8044,
+      "claude-sonnet-5-5|instructions": 22.2861,
+      "claude-sonnet-5-5|math": 3.7326,
+      "claude-sonnet-5-5|structured": 4.2198,
+      "claude-sonnet-5-5|all": 3.9159,
+      "gpt-6-luna|coding": 1.7948,
+      "gpt-6-luna|instructions": 7.4198,
+      "gpt-6-luna|math": 0.6009,
+      "gpt-6-luna|structured": null,
+      "gpt-6-luna|all": 1.2148,
+      "gpt-6-sol|coding": 1.3315,
+      "gpt-6-sol|instructions": 1.9247,
+      "gpt-6-sol|math": 0.3114,
+      "gpt-6-sol|structured": null,
+      "gpt-6-sol|all": 0.4117,
+      "gpt-6.1-terra|coding": 0.8314,
+      "gpt-6.1-terra|instructions": 2.9479,
+      "gpt-6.1-terra|math": null,
+      "gpt-6.1-terra|structured": null,
+      "gpt-6.1-terra|all": 0.4513
+    }
   }
 }
