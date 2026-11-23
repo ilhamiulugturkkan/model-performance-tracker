@@ -15,7 +15,7 @@ class AlertContext(BaseModel):
 class DetectorResult(BaseModel):
     model_config = ConfigDict(frozen=True)
     detector: Literal["pass_rate", "length", "latency", "text", "naive", "cusum"]
-    metric_unit: Literal["points", "tokens", "seconds", "score", "none"]
+    metric_unit: Literal["points", "percent", "tokens", "seconds", "score", "none"]
     statistic: float | None = None
     p_value: float | None = Field(default=None, ge=0, le=1)
     effect_size: float | None = None
