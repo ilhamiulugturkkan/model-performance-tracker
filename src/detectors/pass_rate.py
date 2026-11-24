@@ -8,6 +8,11 @@ from .result import AlertContext, DetectorResult
 
 THRESHOLDS_PATH = Path(__file__).with_name("thresholds.json")
 REPEATS_PER_RUN = 3  # repeats per probe in one scheduled run
+# An effect within this relative distance of the limit counts as AT the limit, not beyond it.
+# The stored thresholds are rounded to 4 decimals, and a pass-rate effect moves in whole steps
+# (e.g. 1 point for 10 probes x 10 repeats), so the no-change effect often sits exactly on its
+# limit: without this, rounding turns those ties into alarms (47% false alarms on one key).
+TIE_TOLERANCE = 1e-4
 
 
 def window_pass_rate(window):
@@ -173,8 +178,12 @@ def detect_windows(
     thresholds,
     provider="unknown",
     window_runs=(),
+    n_perm=10000,
+    n_boot=2000,
 ):
     # Pure pass-rate detector: rows in, DetectorResult out (no database).
+    # n_perm / n_boot: resamples for the p-value and the interval. They do not change the alarm,
+    # which is |effect| > threshold; fewer make a call much faster (for tests and simulations).
 
     # Alarms when |current - reference| (points) exceeds the scaled noise threshold
     key = f"{model}|{category}"
@@ -222,15 +231,15 @@ def detect_windows(
         )
 
     threshold = scaled_threshold(threshold12, n_ref_runs, n_cur_runs)
-    p = permutation_p_value(reference_window, current_window)
-    ci = bootstrap_ci(reference_window, current_window)
+    p = permutation_p_value(reference_window, current_window, n_perm=n_perm)
+    ci = bootstrap_ci(reference_window, current_window, n_boot=n_boot)
     evidence = f"p = {p:.4f}, 95% CI [{ci[0]:+.1f}, {ci[1]:+.1f}] points"
     approx = (
         " Threshold is approximate (few noisy probes)."
         if key in thresholds.get("approximate", ())
         else ""
     )
-    alarm = abs(effect) > threshold
+    alarm = abs(effect) > threshold * (1 + TIE_TOLERANCE)
     return result(
         "alarm" if alarm else "ok",
         f"Pass rate changed {effect:+.1f} points, {'beyond' if alarm else 'within'} {threshold:.1f} "
@@ -242,7 +251,16 @@ def detect_windows(
     )
 
 
-def detect(model, category, reference_runs, current_runs, conn=None, thresholds=None):
+def detect(
+    model,
+    category,
+    reference_runs,
+    current_runs,
+    conn=None,
+    thresholds=None,
+    n_perm=10000,
+    n_boot=2000,
+):
     """Load both windows from the database and run detect_windows on them."""
     return detect_windows(
         model,
@@ -254,6 +272,8 @@ def detect(model, category, reference_runs, current_runs, conn=None, thresholds=
         thresholds if thresholds is not None else load_thresholds(),
         provider=model_provider(model, conn) or "unknown",
         window_runs=current_runs,
+        n_perm=n_perm,
+        n_boot=n_boot,
     )
 
 
