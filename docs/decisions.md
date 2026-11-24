@@ -122,3 +122,6 @@ Output-text detector. It catches changes in the shape of replies (format, markdo
 
 ### D25 CUSUM AND A LONGER WINDOW: NOT BUILT
 Persistent shifts smaller than the 4-run detection limit may go unalarmed until they grow. Accepted for now. Revisit if real runs or the W3.3 validation show slow drifts.
+
+### D26 SLOT RESULTS ARE SECONDARY
+The night and day latency results add up to 50 more tests, and their limits rest on 6 real windows each. A slot alarm is a lead to inspect, not an alert, until the many-tests control exists.
