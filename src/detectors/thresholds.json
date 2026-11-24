@@ -75,5 +75,208 @@
       "gpt-6.1-terra|structured": null,
       "gpt-6.1-terra|all": 0.4513
     }
+  },
+  "text": {
+    "generated": "2026-11-24T15:18:00Z",
+    "commit": "06bd173-dirty",
+    "metric": "output text features",
+    "features": [
+      "lines",
+      "markdown",
+      "digit_share",
+      "word_len",
+      "short_start",
+      "distinct"
+    ],
+    "unit": "each feature's own unit (lines, markers, share, characters, fraction, ratio)",
+    "repeats_per_probe": 12,
+    "method": "20000 stratified burst splits; per feature, effect = mean over probes of (window 2 mean - window 1 mean) of the reply feature; t_f = M * sd_f, where sd_f is the spread of feature f's no-change effects and M is the 99.8th percentile of the per-split max over features of |effect_f| / sd_f; scaled from 10 to 12 repeats by sqrt(10/12); the detector alarms when any |effect_f| > t_f; null = feature (or whole key) never varies",
+    "n_splits": 20000,
+    "seed": 0,
+    "approximate": [
+      "claude-haiku-5-5|structured",
+      "claude-sonnet-5-5|structured"
+    ],
+    "thresholds": {
+      "claude-haiku-5-5|coding": {
+        "lines": 0.60414,
+        "markdown": null,
+        "digit_share": 0.00121698,
+        "word_len": 0.0809703,
+        "short_start": null,
+        "distinct": 0.018392
+      },
+      "claude-haiku-5-5|instructions": {
+        "lines": 0.29836,
+        "markdown": null,
+        "digit_share": 0.00112353,
+        "word_len": 0.169369,
+        "short_start": null,
+        "distinct": 0.0287784
+      },
+      "claude-haiku-5-5|math": {
+        "lines": 0.269487,
+        "markdown": 0.128865,
+        "digit_share": 0.0385017,
+        "word_len": 0.0368876,
+        "short_start": 0.0475824,
+        "distinct": 0.0211562
+      },
+      "claude-haiku-5-5|structured": {
+        "lines": 0.0912871,
+        "markdown": 0.0912871,
+        "digit_share": 0.00101347,
+        "word_len": 0.0122259,
+        "short_start": 0.0456435,
+        "distinct": null
+      },
+      "claude-haiku-5-5|all": {
+        "lines": 0.196,
+        "markdown": 0.073047,
+        "digit_share": 0.0212909,
+        "word_len": 0.0368771,
+        "short_start": 0.0276356,
+        "distinct": 0.0130081
+      },
+      "claude-sonnet-5-5|coding": {
+        "lines": 0.341761,
+        "markdown": null,
+        "digit_share": 0.00034153,
+        "word_len": 0.0226425,
+        "short_start": null,
+        "distinct": 0.00372977
+      },
+      "claude-sonnet-5-5|instructions": {
+        "lines": 0.277058,
+        "markdown": null,
+        "digit_share": 0.000343084,
+        "word_len": 0.125226,
+        "short_start": 0.0406224,
+        "distinct": 0.0270908
+      },
+      "claude-sonnet-5-5|math": {
+        "lines": 0.412302,
+        "markdown": 0.177396,
+        "digit_share": 0.0186398,
+        "word_len": 0.0575933,
+        "short_start": 0.0672903,
+        "distinct": 0.020334
+      },
+      "claude-sonnet-5-5|structured": {
+        "lines": 0.0483431,
+        "markdown": null,
+        "digit_share": 0.000969146,
+        "word_len": 0.0352617,
+        "short_start": null,
+        "distinct": 0.00726407
+      },
+      "claude-sonnet-5-5|all": {
+        "lines": 0.234737,
+        "markdown": 0.0940921,
+        "digit_share": 0.00997811,
+        "word_len": 0.0387215,
+        "short_start": 0.0362466,
+        "distinct": 0.0119957
+      },
+      "gpt-6-luna|coding": {
+        "lines": 0.22916,
+        "markdown": null,
+        "digit_share": 0.00035168,
+        "word_len": 0.0240195,
+        "short_start": null,
+        "distinct": 0.00709962
+      },
+      "gpt-6-luna|instructions": {
+        "lines": 0.289825,
+        "markdown": null,
+        "digit_share": 0.000592715,
+        "word_len": 0.107364,
+        "short_start": 0.0786665,
+        "distinct": 0.0185037
+      },
+      "gpt-6-luna|math": {
+        "lines": null,
+        "markdown": null,
+        "digit_share": 0.00386769,
+        "word_len": 0.0393042,
+        "short_start": null,
+        "distinct": null
+      },
+      "gpt-6-luna|structured": null,
+      "gpt-6-luna|all": {
+        "lines": 0.0596392,
+        "markdown": null,
+        "digit_share": 0.00225188,
+        "word_len": 0.0285943,
+        "short_start": 0.0120821,
+        "distinct": 0.00306211
+      },
+      "gpt-6-sol|coding": {
+        "lines": 0.197789,
+        "markdown": null,
+        "digit_share": 0.000595862,
+        "word_len": 0.04271,
+        "short_start": null,
+        "distinct": 0.00473757
+      },
+      "gpt-6-sol|instructions": {
+        "lines": null,
+        "markdown": null,
+        "digit_share": 0.000812099,
+        "word_len": 0.0604356,
+        "short_start": 0.0658578,
+        "distinct": 0.00561125
+      },
+      "gpt-6-sol|math": {
+        "lines": null,
+        "markdown": null,
+        "digit_share": 0.00929776,
+        "word_len": 0.0249281,
+        "short_start": null,
+        "distinct": null
+      },
+      "gpt-6-sol|structured": null,
+      "gpt-6-sol|all": {
+        "lines": 0.0355704,
+        "markdown": null,
+        "digit_share": 0.00516903,
+        "word_len": 0.0185066,
+        "short_start": 0.0103732,
+        "distinct": 0.00122504
+      },
+      "gpt-6.1-terra|coding": {
+        "lines": 0.178682,
+        "markdown": null,
+        "digit_share": 0.00100221,
+        "word_len": 0.0542965,
+        "short_start": null,
+        "distinct": 0.00266488
+      },
+      "gpt-6.1-terra|instructions": {
+        "lines": 0.504191,
+        "markdown": null,
+        "digit_share": 0.000403411,
+        "word_len": 0.125481,
+        "short_start": 0.0514803,
+        "distinct": 0.00826297
+      },
+      "gpt-6.1-terra|math": {
+        "lines": null,
+        "markdown": null,
+        "digit_share": 0.00159252,
+        "word_len": 0.0266254,
+        "short_start": null,
+        "distinct": null
+      },
+      "gpt-6.1-terra|structured": null,
+      "gpt-6.1-terra|all": {
+        "lines": 0.0806543,
+        "markdown": null,
+        "digit_share": 0.000885564,
+        "word_len": 0.0253464,
+        "short_start": 0.00763494,
+        "distinct": 0.0013241
+      }
+    }
   }
 }
