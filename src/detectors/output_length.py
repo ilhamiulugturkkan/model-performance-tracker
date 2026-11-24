@@ -208,8 +208,13 @@ def detect_windows(
     thresholds,
     provider="unknown",
     window_runs=(),
+    n_perm=10000,
+    n_boot=2000,
 ):
     """Output-length detector: rows in, DetectorResult out (no database).
+
+    n_perm / n_boot: resamples for the p-value and the interval. They do not change the alarm
+    (|effect| > threshold); fewer make a call much faster (for tests and simulations).
 
     Alarms when |effect| (mean per-probe % change in mean output tokens) exceeds
     the noise threshold for this model and category, scaled to the window sizes.
@@ -264,8 +269,8 @@ def detect_windows(
         )
 
     threshold = scaled_threshold(threshold12, n_ref_runs, n_cur_runs)
-    p = signed_rank_p_value(list(compared["changes"].values()))
-    ci = bootstrap_ci_length(reference_window, current_window)
+    p = signed_rank_p_value(list(compared["changes"].values()), n_perm=n_perm)
+    ci = bootstrap_ci_length(reference_window, current_window, n_boot=n_boot)
     evidence = "p = " + (f"{p:.4f}" if p is not None else "n/a")
     if ci:
         evidence += f", 95% CI [{ci[0]:+.1f}, {ci[1]:+.1f}]%"
@@ -292,7 +297,16 @@ def detect_windows(
     )
 
 
-def detect(model, category, reference_runs, current_runs, conn=None, thresholds=None):
+def detect(
+    model,
+    category,
+    reference_runs,
+    current_runs,
+    conn=None,
+    thresholds=None,
+    n_perm=10000,
+    n_boot=2000,
+):
     """Load both windows from the database and run detect_windows on them."""
     return detect_windows(
         model,
@@ -304,4 +318,6 @@ def detect(model, category, reference_runs, current_runs, conn=None, thresholds=
         thresholds if thresholds is not None else load_thresholds(),
         provider=model_provider(model, conn) or "unknown",
         window_runs=current_runs,
+        n_perm=n_perm,
+        n_boot=n_boot,
     )

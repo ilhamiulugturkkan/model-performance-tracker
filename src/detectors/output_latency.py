@@ -179,6 +179,8 @@ def detect_windows(
     provider="unknown",
     window_runs=(),
     slot=None,
+    n_perm=10000,
+    n_boot=2000,
 ):
     """Latency detector: rows in, DetectorResult out (no database).
 
@@ -261,8 +263,8 @@ def detect_windows(
         )
 
     threshold = latency_limit(threshold12, n_ref_runs, n_cur_runs)
-    p = signed_rank_p_value(list(compared["changes"].values()))
-    ci = bootstrap_ci_latency(reference_window, current_window)
+    p = signed_rank_p_value(list(compared["changes"].values()), n_perm=n_perm)
+    ci = bootstrap_ci_latency(reference_window, current_window, n_boot=n_boot)
     evidence = "p = " + (f"{p:.4f}" if p is not None else "n/a")
     if ci:
         evidence += f", 95% CI [{ci[0]:+.1f}, {ci[1]:+.1f}]%"
@@ -306,7 +308,15 @@ def detect_windows(
 
 
 def detect(
-    model, category, reference_runs, current_runs, conn=None, thresholds=None, slot=None
+    model,
+    category,
+    reference_runs,
+    current_runs,
+    conn=None,
+    thresholds=None,
+    slot=None,
+    n_perm=10000,
+    n_boot=2000,
 ):
     """Load both windows from the database and run detect_windows on them (see its `slot`)."""
     return detect_windows(
@@ -320,11 +330,20 @@ def detect(
         provider=model_provider(model, conn) or "unknown",
         window_runs=current_runs,
         slot=slot,
+        n_perm=n_perm,
+        n_boot=n_boot,
     )
 
 
 def detect_slots(
-    model, category, reference_runs, current_runs, conn=None, thresholds=None
+    model,
+    category,
+    reference_runs,
+    current_runs,
+    conn=None,
+    thresholds=None,
+    n_perm=10000,
+    n_boot=2000,
 ):
     """{"night": result, "day": result}: the detector run separately on each slot's runs.
 
@@ -334,7 +353,15 @@ def detect_slots(
     """
     return {
         slot: detect(
-            model, category, reference_runs, current_runs, conn, thresholds, slot=slot
+            model,
+            category,
+            reference_runs,
+            current_runs,
+            conn,
+            thresholds,
+            slot=slot,
+            n_perm=n_perm,
+            n_boot=n_boot,
         )
         for slot in SLOTS
     }
