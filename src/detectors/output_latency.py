@@ -143,6 +143,17 @@ def bootstrap_ci_latency(
     return _percentile(effects, 2.5), _percentile(effects, 97.5)
 
 
+def latency_limit(threshold12, n_ref_runs, n_cur_runs):
+    """The alarm limit for windows of n runs, given the 12-repeat (4-run) limit.
+
+    Smaller windows are noisier, so the limit grows (the usual scaling). Larger windows do NOT get
+    a smaller limit: real latency drifts like a random walk (windows 2 slot-runs apart spread about
+    1.4 times more than windows 1 apart), so averaging more runs does not shrink the noise by the
+    square root of the number of runs. The limit never goes below the 12-repeat one.
+    """
+    return max(scaled_threshold(threshold12, n_ref_runs, n_cur_runs), threshold12)
+
+
 def known_threshold(thresholds, key):
     """The 12-repeat latency threshold for `key`, or None if it is not known.
 
@@ -237,7 +248,8 @@ def detect_windows(
     if threshold12 is None:
         in_file = key in thresholds.get("latency", {}).get("thresholds", {})
         why = (
-            "calibrated, but latency never varied enough in the burst to set a limit"
+            "calibrated, but a usable limit cannot be determined: latency did not vary in "
+            "the burst, or real run-to-run noise is so large that the limit would be too wide to use"
             if in_file
             else "never calibrated"
         )
@@ -248,7 +260,7 @@ def detect_windows(
             effect=effect,
         )
 
-    threshold = scaled_threshold(threshold12, n_ref_runs, n_cur_runs)
+    threshold = latency_limit(threshold12, n_ref_runs, n_cur_runs)
     p = signed_rank_p_value(list(compared["changes"].values()))
     ci = bootstrap_ci_latency(reference_window, current_window)
     evidence = "p = " + (f"{p:.4f}" if p is not None else "n/a")
@@ -314,7 +326,12 @@ def detect(
 def detect_slots(
     model, category, reference_runs, current_runs, conn=None, thresholds=None
 ):
-    """{"night": result, "day": result}: the detector run separately on each slot's runs."""
+    """{"night": result, "day": result}: the detector run separately on each slot's runs.
+
+    Slot results are secondary evidence: they add up to 50 more tests on top of the mixed ones
+    and their limits rest on very few real windows, so one slot alarming is a lead to look at,
+    not an alert on its own until the many-tests control exists.
+    """
     return {
         slot: detect(
             model, category, reference_runs, current_runs, conn, thresholds, slot=slot
