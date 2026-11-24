@@ -5,6 +5,7 @@ from src.detectors.output_latency import (
     compare_window_latencies,
     detect_windows,
     known_threshold,
+    latency_limit,
     window_latency,
 )
 
@@ -152,6 +153,30 @@ def test_threshold_scales_with_window_size():
     assert run("math", window(), cur, n_ref=1, n_cur=1).status == "ok"  # limit 20
 
 
+def test_larger_windows_never_get_a_limit_below_the_12_repeat_one():
+    # 8 runs against 8 runs: the usual scaling would shrink 10 to 7.07; the floor keeps it at 10
+    r = run("math", window(), window(scale=1.08), n_ref=8, n_cur=8)
+    assert r.context.threshold == pytest.approx(10.0) and r.status == "ok"
+    assert run("math", window(), window(scale=1.12), n_ref=8, n_cur=8).status == "alarm"
+    # smaller windows are still noisier, so their limit still grows
+    assert run(
+        "math", window(), window(), n_ref=1, n_cur=1
+    ).context.threshold == pytest.approx(20.0)
+    assert run(
+        "math", window(), window(), n_ref=2, n_cur=2
+    ).context.threshold == pytest.approx(10.0 * 2**0.5)
+    assert run("math", window(), window(), n_ref=4, n_cur=1).context.threshold > 10.0
+
+
+def test_latency_limit_function():
+    assert latency_limit(10.0, 4, 4) == pytest.approx(10.0)
+    assert latency_limit(10.0, 16, 16) == pytest.approx(10.0)  # floor
+    assert latency_limit(10.0, 1, 1) == pytest.approx(20.0)
+    assert latency_limit(10.0, 4, 8) == pytest.approx(
+        10.0
+    )  # one window larger: still not below 10
+
+
 def test_concentrated_change_is_named_in_the_message():
     r = run(
         "math", window(), window(scale=3.5, scale_probes={7})
@@ -191,7 +216,7 @@ def test_known_threshold_only_accepts_positive_finite_numbers():
 def test_no_threshold_wording_separates_null_keys_from_uncalibrated_keys():
     null_key = run("coding", window(), window())
     unseen = run("never-seen", window(), window())
-    assert "never varied enough" in null_key.reason
+    assert "cannot be determined" in null_key.reason
     assert "never calibrated" not in null_key.reason
     assert "never calibrated" in unseen.reason
 
