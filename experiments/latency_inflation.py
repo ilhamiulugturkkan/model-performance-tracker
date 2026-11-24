@@ -33,6 +33,14 @@ WIDTH = 4
 # reasoning start, but reasoning ramps up on 5 probes over runs 5-13 and does not move latency;
 # see the notes in the report. Kept as a parameter so the cut can be tried.
 EXCLUDE_FROM = {}
+# Known real drift inside the estimation runs. The estimate keeps it (the assumption is that nothing
+# changed, so drift counts as noise), but the factor is recorded with this note.
+DRIFT_NOTES = {
+    "claude-haiku-5-5": (
+        "gradual speed-up of about 1.3% per run over runs 3-21 (a straight line fits better than a "
+        "single step), so there is no clean cut-off; the factor includes it"
+    ),
+}
 
 
 def _lower_gamma_regularized(a, x):
@@ -146,6 +154,7 @@ def estimate_factor(model, category, burst_sd, conn=None):
         "lag1_spread": _rms(lag1) if lag1 else None,
         "lag2_spread": _rms(lag2) if lag2 else None,
         "approximate": True,  # overlapping windows, one shared reference window
+        **({"note": DRIFT_NOTES[model]} if model in DRIFT_NOTES else {}),
     }
 
 
@@ -246,6 +255,7 @@ def estimate_slot_factor(model, category, slot, burst_sd12, conn=None):
         "lag1_spread": _rms(lag1) if lag1 else None,
         "lag2_spread": _rms(lag2) if lag2 else None,
         "approximate": True,
+        **({"note": DRIFT_NOTES[model]} if model in DRIFT_NOTES else {}),
     }
 
 

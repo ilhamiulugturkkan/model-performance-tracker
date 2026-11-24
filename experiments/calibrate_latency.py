@@ -36,6 +36,10 @@ from experiments.calibrate_length import (
 )
 from src.detectors.output_latency import compare_window_latencies, window_latency
 
+# A limit above this many percent is not a rule anyone can use: it only fires on a 2x slowdown.
+# Such keys get null, and the detector then says the limit "cannot be determined".
+MAX_USABLE_LIMIT = 100.0
+
 
 def null_effects(rows, n_splits, seed):
     """Latency effect (mean per-probe % change in median latency) of n_splits no-change splits."""
@@ -84,6 +88,7 @@ def build_latency_section(burst, factors, n_splits=20000, seed=0, slot_factors=N
     own factor. The slot keys are always approximate.
     """
     thresholds, burst_thresholds, inflation, approximate = {}, {}, {}, []
+    unusable = {}  # key -> the limit it would have had, nulled because it is above MAX_USABLE_LIMIT
     for key, entry in burst.items():
         burst_thresholds[key] = _round_or_none(entry["threshold"])
         applied = factors.get(key, {}).get("applied", 1.0)
@@ -92,6 +97,8 @@ def build_latency_section(burst, factors, n_splits=20000, seed=0, slot_factors=N
             if entry["threshold"] is None
             else _round_or_none(entry["threshold"] * applied)
         )
+        if thresholds[key] is not None and thresholds[key] > MAX_USABLE_LIMIT:
+            unusable[key], thresholds[key] = thresholds[key], None
         if key in factors:
             inflation[key] = {
                 k: (round(v, 4) if isinstance(v, float) else v)
@@ -106,6 +113,8 @@ def build_latency_section(burst, factors, n_splits=20000, seed=0, slot_factors=N
     for slot_key, est in (slot_factors or {}).items():
         base = burst[slot_key.rsplit("|", 1)[0]]
         thresholds[slot_key] = _round_or_none(base["threshold"] * est["applied"])
+        if thresholds[slot_key] > MAX_USABLE_LIMIT:
+            unusable[slot_key], thresholds[slot_key] = thresholds[slot_key], None
         inflation[slot_key] = {
             k: (round(v, 4) if isinstance(v, float) else v) for k, v in est.items()
         }
@@ -126,11 +135,14 @@ def build_latency_section(burst, factors, n_splits=20000, seed=0, slot_factors=N
             "when above the chi-square cutoff, else 1. Keys 'model|category|night' and "
             "'model|category|day' are for one time-of-day slot (03:00 or 15:00 UTC runs) compared "
             "with itself: same burst threshold, factor from 2-run same-slot windows. One threshold "
-            "applied to |effect|; null = no variation in the burst"
+            "applied to |effect|; null = no variation in the burst, or a limit above max_usable_limit "
+            "percent (listed under unusable with the value it would have had)"
         ),
         "n_splits": n_splits,
         "seed": seed,
-        "approximate": sorted(approximate),
+        "approximate": sorted(k for k in approximate if thresholds.get(k) is not None),
+        "max_usable_limit": MAX_USABLE_LIMIT,
+        "unusable": unusable,
         "thresholds": thresholds,
         "burst_thresholds": burst_thresholds,
         "inflation": inflation,
