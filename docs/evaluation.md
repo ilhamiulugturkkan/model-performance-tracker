@@ -103,3 +103,18 @@ Already decided: false-alarm target (1 per 500 checks), repeats per case (20), c
 ## Addenda (dated changes to this plan)
 
 **2026-11-04: pass-rate denominator and error rate (see D11).** Pass rate is computed over calls that returned a reply. Calls with no reply are not scored and are counted in a separate error rate (`calls.error` set / all calls), reported next to every pass rate. Reason: provider outages should not look like quality drops. This does not change the three detection metrics. Error rate is reported as its own series and is not one of the four detector signals unless a later addendum adds it.
+
+### Naive baseline (fixed 5-point drop): false-alarm rate on no-change data
+
+Measured on 20,000 no-change burst splits (10 + 10 repeats, seed 0) per model × category, against the calibrated pass-rate limit at 12 repeats.
+
+| Group | Naive false alarms per check (two-sided / drops-only) | Calibrated limit |
+|---|---|---|
+| Instructions (5 models) | 13.3-28.9% / 6.6-14.6% | 8.2-15.8 points |
+| Math, structured, all (11 cells with variation) | 0-0.95% / 0-0.44% | 1.8-5.3 points |
+| Coding/structured, deterministic (9 cells) | 0% / 0% | none (null) |
+| Any category of a model | 13.7-28.4% / 7.0-14.1% | n/a |
+
+A single fixed number fails in both directions. In instructions, 5 points is well inside the noise (sd 3-5 points), so a naive monitor would raise a false alarm roughly every 4-14 checks. In the quiet categories it is almost silent, but it only reaches 80% power at about 6 points, where calibrated limits are mostly 2-4 (Haiku math is the exception: the two are similar). In the nine deterministic cells the naive rule is the only pass-rate rule that can alarm at all, so it is useful there, though only as far as burst noise (a lower bound) can be trusted.
+
+Caveats: splits use 10 repeats against 12 in production, which slightly overstates the rates; burst noise is a lower bound on real noise, so real naive false-alarm rates are probably higher.
