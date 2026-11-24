@@ -105,3 +105,20 @@ Deciding on latency threshold would be a mistake (burst and real data sd's are a
 ### D21 MIN MEAN TOKENS (OUTPUT LENGTH)
 
 Chosen 5 after checking: no probe under 5; 10 would remove all OpenAI math probes
+
+### D22 DON'T ALERT IF THRESHOLD IS UNKNOWN.
+
+Some models' threshold for some categories are unknown as the experiments couldn't catch a meaningful variation. That's alright. It can be caused by limited data, or something else. Doesn't matter. I'll check the thresholds of the detectors constantly and if something changes, extra alerts can be added.
+
+### D23 OUTPUT CONTEXT DETECTION METHOD
+
+Six features per reply, per-probe change in the mean, effect = mean over probes seen in both windows, and a limit per feature of M × sd_f × √(10/12). M is the 99.8th percentile of the largest |effect|/sd across features, so the whole detector runs at 1-in-500 per check. It alarms when any feature is over its limit, and the reason names those features.
+
+The statistic is the largest ratio of effect to limit, and threshold is 1.0. No p-value or CI for this detector (threshold only).
+
+### D24 REASONING COUNTS AS OUTPUT TOKEN
+
+Output-text detector. It catches changes in the shape of replies (format, markdown, structure) that pass rate and length miss, using six cheap reply features, each with a limit set from burst noise. The limits share one multiplier, so the whole detector runs at about 1 false alarm in 500 per check. Features that never vary in the burst are not checked, which is a known blind spot (e.g. markdown on GPT models). Synthetic shifts are caught at 10-25% of replies changed on most keys; on real data it stayed quiet where only reasoning tokens changed (Haiku), as intended.
+
+### D25 CUSUM AND A LONGER WINDOW: NOT BUILT
+Persistent shifts smaller than the 4-run detection limit may go unalarmed until they grow. Accepted for now. Revisit if real runs or the W3.3 validation show slow drifts.
